@@ -16,11 +16,7 @@ class Beeper : public QIODevice
 
                 void start();
                 void stop();
-
-                //char *t;
-                //int len;
-                //int pos;
-                //int total;
+                void restart();
 
                 qint64 readData(char *data, qint64 maxlen);
                 qint64 writeData(const char *data, qint64 len);

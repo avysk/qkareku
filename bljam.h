@@ -16,7 +16,7 @@ class Bljam : public QWidget
 
         public:
 
-                Bljam(double freq, QWidget *parent = 0);
+                Bljam(double freq, int c, QWidget *parent = 0);
                 ~Bljam();
 
                 QSize minimumSizeHint() const;
@@ -30,22 +30,22 @@ class Bljam : public QWidget
                 void setValue(int);
                 int getAlpha(void) const;
                 void setAlpha(int);
-
         public slots:
-                void play(void);
+                void play(int);
 
         protected:
                 void paintEvent(QPaintEvent *event);
                 void mouseReleaseEvent(QMouseEvent *event);
 
         private:
-                bool state;
+                double frequency;
+                int column;
                 int s_hue, s_saturation, s_value, s_alpha;
+                bool state;
 
                 Beeper *beep;
                 QAudioOutput *audioOutput;
                 QAudioFormat settings;
-                double frequency;
 
 };
 

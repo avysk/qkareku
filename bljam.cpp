@@ -3,17 +3,20 @@
 #include <QPropertyAnimation>
 
 #include "bljam.h"
+#include "blip.h"
 
-Bljam::Bljam(double freq, QWidget *parent)
-        : QWidget(parent), frequency(freq)
+Bljam::Bljam(double freq, int c, QWidget *parent) :
+        QWidget(parent),
+        frequency(freq),
+        column(c),
+        s_hue(Blip::get().hue),
+        s_saturation(Blip::get().saturation),
+        s_value(Blip::get().normalValue),
+        s_alpha(Blip::get().inactiveAlpha),
+        state(false)
 {
         setBackgroundRole(QPalette::Shadow);
         setAutoFillBackground(true);
-        state = false;
-        setHue(120);
-        setSaturation(255);
-        setValue(160);
-        setAlpha(0);
 
         settings.setFrequency(SYSTEM_FREQ);
         settings.setChannels(1);
@@ -52,16 +55,17 @@ QSize Bljam::sizeHint() const
         return QSize(50, 50);
 }
 
-void Bljam::play()
+void Bljam::play(int c)
 {
+        if (c != column) return;
         QPropertyAnimation *animation = new QPropertyAnimation(this, "value");
         animation->setDuration(200);
         animation->setStartValue(255);
         animation->setKeyValueAt(0.8, 100);
         animation->setEndValue(160);
         animation->start(QAbstractAnimation::DeleteWhenStopped);
-        //if (state)
-        //        audioOutput->start(beep);
+        if (state)
+                beep->restart();
 }
 
 void Bljam::paintEvent(QPaintEvent *)
@@ -81,7 +85,7 @@ void Bljam::mouseReleaseEvent(QMouseEvent *)
         int end;
         if (state) {
                 start = 255;
-                end = 0;
+                end = 50;
                 if (beep) {
                         audioOutput->stop();
                         beep->stop();
@@ -89,7 +93,7 @@ void Bljam::mouseReleaseEvent(QMouseEvent *)
                         beep = 0;
                 }
         } else {
-                start = 0;
+                start = 50;
                 end = 255;
                 beep = new Beeper(frequency, this);
                 beep->start();

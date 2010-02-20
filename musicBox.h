@@ -13,9 +13,14 @@ class MusicBox : public QMainWindow
         public:
                 MusicBox();
                 ~MusicBox();
+        public slots:
+                void play(void);
         private:
                 QTimer *timer;
                 Bljam *bljams[8][16];
+                unsigned int playingColumn;
+        signals:
+                void playColumn(int column);
 };
 
 #endif

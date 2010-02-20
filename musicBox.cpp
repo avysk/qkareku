@@ -1,6 +1,7 @@
 #include <QGridLayout>
 #include <QTimer>
 #include "musicBox.h"
+#include "blip.h"
 
 MusicBox::MusicBox()
 {
@@ -12,24 +13,23 @@ MusicBox::MusicBox()
         layout->setVerticalSpacing(0);
 
         timer = new QTimer(window);
+        QObject::connect(timer, SIGNAL(timeout()), this, SLOT(play()));
 
-        double semi = pow(2.0, 1.0/12.0);
-        double freq = 440.0;
         for (int r = 0; r < 8; r++) {
                 for (int c = 0; c < 16; c++) {
-                        bljams[r][c] = new Bljam(freq, window);
+                        bljams[r][c] = new Bljam(Blip::get().freq[r], c, window);
+                        QObject::connect(this, SIGNAL(playColumn(int)), bljams[r][c], SLOT(play(int)));
                         layout->addWidget(bljams[r][c], r, c);
-                        QObject::connect(timer, SIGNAL(timeout()), bljams[r][c], SLOT(play()));
                 }
-                freq *= semi;
         }
 
         window->setLayout(layout);
         setCentralWidget(window);
         window->show();
 
-        Blip::get().duration = 0.2;
-        timer->start(1500);
+        Blip::get().duration = 0.3;
+        playingColumn = 0;
+        timer->start(Blip::get().delay);
 }
 
 MusicBox::~MusicBox()
@@ -39,4 +39,11 @@ MusicBox::~MusicBox()
         for (int r = 0; r < 8; r++)
                 for (int c = 0; c < 8; c++)
                         delete bljams[r][c];
+}
+
+void MusicBox::play()
+{
+        emit playColumn(playingColumn++);
+        if (playingColumn > 15)
+                playingColumn = 0;
 }
