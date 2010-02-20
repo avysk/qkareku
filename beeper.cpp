@@ -7,11 +7,14 @@ Beeper::Beeper(double f, QObject *parent)
         : QIODevice(parent), frequency(f)
 {
         // FIXME: reallocate if duration changes
-        buffer = new char[(unsigned int)(Blip::get().duration * SYSTEM_FREQ) * 2];
-        t = buffer;
-        len = fillData(t, Blip::get().duration);
+        buflen = (unsigned int)(Blip::get().duration * SYSTEM_FREQ) * 2;
+        buffer = new char[buflen];
+
+        //t = buffer;
+        //len = fillData(t, Blip::get().duration);
+        fillData(buffer, Blip::get().duration);
         pos = 0;
-        total = len;
+        //total = len;
 }
 
 Beeper::~Beeper()
@@ -35,7 +38,7 @@ void Beeper::putShort(char *t, short v)
         *(unsigned char *)(t) = (unsigned char)((v >> 8) & 0xFF);
 }
 
-int Beeper::fillData(char *start, double duration)
+void Beeper::fillData(char *start, double duration)
 {
         int i, len = 0;
         int v;
@@ -43,18 +46,13 @@ int Beeper::fillData(char *start, double duration)
         double adsr;
         for (i = 0; i < duration * SYSTEM_FREQ; i++) {
                 adsr = Blip::get().ADSR(i / (duration * SYSTEM_FREQ));
-                //v = 2.0 * M_PI * i * frequency / SYSTEM_FREQ;
-                //v = 0.8 * sin(v) + 0.2 * sin(2 * v);
-                //v = (int)(adsr * 32767.0 * v);
                 p = 2.0*M_PI*((double)(i))*frequency/SYSTEM_FREQ;
                 p = sin(p);
                 v = (short)(adsr*32767.0*p);
-                // v = (int)(adsr*32767.0*sin(2.0*M_PI*((double)(i))*frequency/SYSTEM_FREQ));
                 putShort(start, v);
                 start += 2;
                 len += 2;
         }
-        return len;
 }
 
 qint64 Beeper::readData(char *data, qint64 maxlen)
@@ -64,15 +62,15 @@ qint64 Beeper::readData(char *data, qint64 maxlen)
                 len = 16384;
 
         if (len < (Blip::get().duration * SYSTEM_FREQ * 2) - pos) {
-                memcpy(data, t+pos, len);
+                memcpy(data, buffer + pos, len);
                 pos += len;
                 return len;
         } else {
-               //qint64 left = (DURATION*SYSTEM_FREQ/1000*2) - pos;
-               //memcpy(data, t+pos, left);
+               qint64 left = (Blip::get().duration * SYSTEM_FREQ * 2) - pos;
+               memcpy(data, buffer + pos, left);
                //pos = 0;
-               //return left;
-               return 0;
+               return left;
+               //return 0;
         }
 }
 
