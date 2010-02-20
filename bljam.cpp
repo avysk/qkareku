@@ -4,8 +4,8 @@
 
 #include "bljam.h"
 
-Bljam::Bljam(QWidget *parent)
-        : QWidget(parent)
+Bljam::Bljam(double freq, QWidget *parent)
+        : QWidget(parent), frequency(freq)
 {
         setBackgroundRole(QPalette::Shadow);
         setAutoFillBackground(true);
@@ -14,16 +14,42 @@ Bljam::Bljam(QWidget *parent)
         setSaturation(255);
         setValue(160);
         setAlpha(0);
+
+        settings.setFrequency(SYSTEM_FREQ);
+        settings.setChannels(1);
+        settings.setSampleSize(16);
+        settings.setCodec("audio/pcm");
+        settings.setByteOrder(QAudioFormat::LittleEndian);
+        settings.setSampleType(QAudioFormat::SignedInt);
+
+        QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+        if (!info.isFormatSupported(settings)) {
+                qWarning()<<"default format not supported try to use nearest";
+                settings = info.nearestFormat(settings);
+        }
+
+        audioOutput = new QAudioOutput(settings, this);
+        beep = 0;
+
+}
+
+Bljam::~Bljam()
+{
+        audioOutput->stop();
+        if (beep) {
+                delete beep;
+        }
+        delete audioOutput;
 }
 
 QSize Bljam::minimumSizeHint() const
 {
-        return QSize(20, 20);
+        return QSize(50, 50);
 }
 
 QSize Bljam::sizeHint() const
 {
-        return QSize(21, 21);
+        return QSize(50, 50);
 }
 
 void Bljam::play()
@@ -34,6 +60,8 @@ void Bljam::play()
         animation->setKeyValueAt(0.8, 100);
         animation->setEndValue(160);
         animation->start(QAbstractAnimation::DeleteWhenStopped);
+        //if (state)
+        //        audioOutput->start(beep);
 }
 
 void Bljam::paintEvent(QPaintEvent *)
@@ -44,7 +72,7 @@ void Bljam::paintEvent(QPaintEvent *)
         QBrush brush(col);
         painter.setBrush(brush);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.drawEllipse(4,4,12,12);
+        painter.drawEllipse(5,5,40,40);
 }
 
 void Bljam::mouseReleaseEvent(QMouseEvent *)
@@ -54,9 +82,18 @@ void Bljam::mouseReleaseEvent(QMouseEvent *)
         if (state) {
                 start = 255;
                 end = 0;
+                if (beep) {
+                        audioOutput->stop();
+                        beep->stop();
+                        delete beep;
+                        beep = 0;
+                }
         } else {
                 start = 0;
                 end = 255;
+                beep = new Beeper(frequency, this);
+                beep->start();
+                audioOutput->start(beep);
         }
         state = not state;
         QPropertyAnimation *animation = new QPropertyAnimation(this, "alpha");

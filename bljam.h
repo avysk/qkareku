@@ -1,9 +1,10 @@
-#ifndef BLJAM_H
-#define BLJAM_H
+#ifndef __BLJAM_H_
+#define __BLJAM_H_
 
-#include <QBrush>
-#include <QPen>
 #include <QWidget>
+#include <QAudioDeviceInfo>
+#include <QAudioOutput>
+#include "beeper.h"
 
 class Bljam : public QWidget
 {
@@ -15,7 +16,8 @@ class Bljam : public QWidget
 
         public:
 
-                Bljam(QWidget *parent = 0);
+                Bljam(double freq, QWidget *parent = 0);
+                ~Bljam();
 
                 QSize minimumSizeHint() const;
                 QSize sizeHint() const;
@@ -39,6 +41,11 @@ class Bljam : public QWidget
         private:
                 bool state;
                 int s_hue, s_saturation, s_value, s_alpha;
+
+                Beeper *beep;
+                QAudioOutput *audioOutput;
+                QAudioFormat settings;
+                double frequency;
 
 };
 
