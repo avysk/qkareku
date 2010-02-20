@@ -41,9 +41,11 @@ void Beeper::fillData(char *start, double duration)
         int v;
         double p;
         double adsr;
+        double phase = qrand()/RAND_MAX * 2 * M_PI;
         for (i = 0; i < duration * SYSTEM_FREQ; i++) {
                 adsr = Blip::get().ADSR(i / (duration * SYSTEM_FREQ));
                 p = 2.0*M_PI*((double)(i))*frequency/SYSTEM_FREQ;
+                p = p + phase;
                 p = sin(p);
                 v = (short)(adsr*32767.0*p);
                 putShort(start, v);
