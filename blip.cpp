@@ -1,7 +1,7 @@
 #include "blip.h"
 
 Blip::Blip()
-        : hue(120), saturation(255), normalValue(160), inactiveAlpha(30), delay(250), echoDecay(2.5)
+        : hue(120), saturation(255), normalValue(160), inactiveAlpha(30), delay(250), echoDecay(2.5), steps(16)
 {
         initFreqPentatonic();
 }

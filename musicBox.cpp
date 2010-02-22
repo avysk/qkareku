@@ -16,7 +16,7 @@ MusicBox::MusicBox()
         QObject::connect(timer, SIGNAL(timeout()), this, SLOT(play()));
 
         for (int r = 0; r < 8; r++) {
-                for (int c = 0; c < 16; c++) {
+                for (int c = 0; c < Blip::get().steps; c++) {
                         bljams[r][c] = new Bljam(Blip::get().freq[r], c, window);
                         QObject::connect(this, SIGNAL(playColumn(int)), bljams[r][c], SLOT(play(int)));
                         layout->addWidget(bljams[r][c], r, c);

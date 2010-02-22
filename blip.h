@@ -17,6 +17,7 @@ class Blip
                 double freq[8];
                 int delay;
                 double echoDecay;
+                int steps;
         private:
                 Blip();
                 double ADSR_linear(double t);
