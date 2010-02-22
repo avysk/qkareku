@@ -21,6 +21,7 @@ class Mixer : public QIODevice
 
         public slots:
                 void mixIn(int step, char *data, int len);
+
         private:
                 void putShort(char *t, short value);
                 unsigned int buflen;
